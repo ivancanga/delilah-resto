@@ -1,11 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const jwt = require('jsonwebtoken');
-const signature = '39486747';
+const jwt = require("jsonwebtoken");
+const signature = "39486747";
 const cors = require("cors");
 const mysql = require("mysql");
 const server = express();
-
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -29,9 +28,11 @@ server.listen(3000, () => {
 server.use(bodyParser.json(), cors());
 
 server.post("/login", userLogin, (req, res) => {
-  const {userData} = req;
-  const token = getToken({userData});
-  res.status(200).json(token);
+  const { userData } = req;
+  const isAdmin = userData[0].admin;
+  const token = getToken({ userData });
+  const activeUser = {token,isAdmin};
+  res.status(200).json(activeUser);
 });
 
 server.post("/register", (req, res) => {
@@ -68,31 +69,21 @@ server.get("/menu", (req, res) => {
 function userLogin(req, res, next) {
   const { user, password } = req.body;
   connection.query(
-    "SELECT username,email,password FROM users",
-    (error, results, fields) => {
+    `SELECT id,name,email,phone,address,admin FROM users 
+     WHERE username = '${user}' OR email = '${user}' AND password = '${password}' `,
+    (error, userData, fields) => {
       if (error) throw error;
-      results.forEach(result => {
-        if (result.username === user || result.email === user) {
-          if (result.password === password) {
-            connection.query(
-              `SELECT * FROM users WHERE username = '${result.username}'`,
-              (error, userData, fields) => {
-                req.userData = userData;
-                next();
-              }
-            );
-          } else {
-            res.status(401).json("Contraseña incorrecta");
-          }
-        } else {
-          res.status(404).json("Usuario inexistente");
-        }
-      });
+      if (userData.length !== 0) {
+        req.userData = userData;
+        next();
+      } else {
+        res.status(400).json("Credenciales incorrectas.");
+      }
     }
   );
 }
 
-function getToken(data){
-  const resp = jwt.sign(data,signature);
+function getToken(data) {
+  const resp = jwt.sign(data, signature);
   return resp;
-};
+}
