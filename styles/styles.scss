@@ -1,0 +1,51 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header{
+    background-color: teal;
+    color: white;
+}
+
+.index-form *{
+    display: block;
+}
+
+.index-form{
+    width: 300px;
+    margin: 0 auto;
+    input{
+        margin: 10px 0;
+        width: 100%;
+        padding: 10px 5px;
+        border-radius: 3px;
+        box-shadow: unset;
+    }
+    button{
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px 5px;
+        background-color: orange;
+        color: white;
+        border-radius: 6px;
+        border: unset;
+        text-transform: uppercase;
+        margin: 10px 0;
+    }
+}
+
+.container__dishes{
+    display: grid;
+    grid-template-columns: repeat(6,1fr);
+    column-gap: 15px;
+    .dish-card{
+        border: 1px solid rgba(128, 128, 128, 0.541);
+        border-radius: 6px;
+        max-width: 300px;
+        img{
+            width: 100%;
+        }
+    }
+}
