@@ -125,6 +125,18 @@ server.get("/orders", auth, getOrders, getProducts, (req, res) => {
   res.status(200).json(orderData);
 });
 
+server.put("/orders/:id", auth, (req, res) => {
+  const { newStatus } = req.body;
+  sequelize
+    .query("UPDATE `orders` SET `id_state` = ? WHERE `orders`.`id` = ?", {
+      replacements: [newStatus, req.params.id],
+      type: sequelize.QueryTypes.UPDATE
+    })
+    .then(() => {
+      res.json("El estado del pedido ha sido modificado con éxito.");
+    });
+});
+
 function setOrder(req, res, next) {
   if (req.session.id_user) {
     const { id_product, qty, paid } = req.body;
