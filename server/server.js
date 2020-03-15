@@ -31,7 +31,10 @@ server.use(
 function auth(req, res, next) {
   if (!req.session.user) {
     res.status(401).json("Necesitas estar logeado para acceder a esta ruta.");
-  } else if (req.headers.authorization && req.session.token === req.headers.authorization.split(" ")[1]) {
+  } else if (
+    req.headers.authorization &&
+    req.session.token === req.headers.authorization.split(" ")[1]
+  ) {
     console.log("Autenticación correcta con token.");
     next();
   } else {
@@ -128,7 +131,7 @@ server.get("/products", auth, (req, res) => {
     });
 });
 
-server.post("/products", authAdmin, setProduct, (req, res) => {
+server.post("/products", auth, authAdmin, setProduct, (req, res) => {
   res.json("Producto agregado a la base de datos.");
 });
 
@@ -150,7 +153,7 @@ server.post("/products", authAdmin, setProduct, (req, res) => {
 //   res.json('Producto actualizado');
 // });
 
-server.delete("/products/:id", authAdmin, deleteProduct, (req, res) => {
+server.delete("/products/:id", auth, authAdmin, deleteProduct, (req, res) => {
   res.json("Producto eliminado de la base de datos.");
 });
 
@@ -184,7 +187,7 @@ function setProduct(req, res, next) {
 
 // ORDENES
 
-server.post("/orders", setOrder, (req, res) => {
+server.post("/orders", auth, setOrder, (req, res) => {
   res.json("Pedido registrado");
 });
 
@@ -193,7 +196,7 @@ server.get("/orders", auth, authAdmin, getOrders, getProducts, (req, res) => {
   res.status(200).json(orderData);
 });
 
-server.put("/orders/:id", authAdmin, (req, res) => {
+server.put("/orders/:id", auth, authAdmin, (req, res) => {
   const { newStatus } = req.body;
   sequelize
     .query("UPDATE `orders` SET `id_state` = ? WHERE `orders`.`id` = ?", {
