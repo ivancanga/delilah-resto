@@ -2,10 +2,11 @@ const dishes = document.querySelector(".container__dishes");
 
 const showDishes = async () => {
   try {
-    response = await fetch("http://127.0.0.1:3000/menu", {
+    response = await fetch("http://127.0.0.1:3000/products", {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${sessionStorage.getItem('delilahresto-activeUser')}`
       }
     });
     const jsonResponse = await response.json();

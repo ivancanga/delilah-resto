@@ -26,9 +26,20 @@ server.use(
   cors()
 );
 
-// AUTH & TOKEN
+// AUTH-AUTH ADMIN & TOKEN
 
 function auth(req, res, next) {
+  if (!req.session.user) {
+    res.status(401).json("Necesitas estar logeado para acceder a esta ruta.");
+  } else if (req.headers.authorization && req.session.token === req.headers.authorization.split(" ")[1]) {
+    console.log("Autenticación correcta con token.");
+    next();
+  } else {
+    res.status(401).json("Error al validar usuario.");
+  }
+}
+
+function authAdmin(req, res, next) {
   if (req.session && req.session.admin) {
     return next();
   } else {
@@ -45,7 +56,7 @@ function getToken(data) {
   return resp;
 }
 
-// REGISTER & LOGIN
+// REGISTER & LOGIN/LOGOUT
 
 server.post("/register", (req, res) => {
   const { username, name, email, phone, address, password, admin } = req.body;
@@ -64,10 +75,9 @@ server.post("/register", (req, res) => {
 
 server.post("/login", userLogin, (req, res) => {
   const { userData } = req;
-  // const isAdmin = userData[0].admin;
-  // const token = getToken({ userData });
-  // const activeUser = { token, isAdmin };
-  res.status(200).json(userData);
+  req.session.token = getToken({ userData });
+  console.log(req.session);
+  res.status(200).json(req.session.token);
 });
 
 function userLogin(req, res, next) {
@@ -87,7 +97,6 @@ function userLogin(req, res, next) {
           req.session.user = user;
           req.session.id_user = result[0].id;
           req.userData = result[0];
-          console.log(req.session);
           next();
         } else {
           res.status(400).json("Credenciales incorrectas.");
@@ -102,11 +111,16 @@ function userLogin(req, res, next) {
   }
 }
 
+server.post("/logout", (req, res) => {
+  req.session.destroy();
+  res.json("Deslogueaste exitosamente.");
+});
+
 // PRODUCTOS
 
-server.get("/products", (req, res) => {
+server.get("/products", auth, (req, res) => {
   sequelize
-    .query("SELECT * FROM products", {
+    .query("SELECT * FROM products WHERE drop_date IS NULL", {
       type: sequelize.QueryTypes.SELECT
     })
     .then(results => {
@@ -114,18 +128,72 @@ server.get("/products", (req, res) => {
     });
 });
 
+server.post("/products", authAdmin, setProduct, (req, res) => {
+  res.json("Producto agregado a la base de datos.");
+});
+
+// server.put("/products/:id", authAdmin, (req, res) => {
+//   sequelize.query(
+//     "SELECT item, photo, description, price FROM products WHERE `products`.`.id` = ?",
+//     {
+//       replacements: [req.params.id]
+//     }
+//   )
+//   const { item, photo, description, price } = req.body;
+//   sequelize.query(
+//     "UPDATE `products` SET `item` = ?, `photo` = ?, `description` = ?, `price` = ? WHERE `products`.`id` = ?",
+//     {
+//       replacements: [item, photo, description, price, req.params.id],
+//       type: sequelize.QueryTypes.INSERT
+//     }
+//   );
+//   res.json('Producto actualizado');
+// });
+
+server.delete("/products/:id", authAdmin, deleteProduct, (req, res) => {
+  res.json("Producto eliminado de la base de datos.");
+});
+
+function deleteProduct(req, res, next) {
+  sequelize
+    .query(
+      "UPDATE `products` SET `drop_date` = CURRENT_TIMESTAMP() WHERE id = ? AND `drop_date` IS NULL",
+      {
+        replacements: [req.params.id]
+      }
+    )
+    .then(() => {
+      next();
+    });
+}
+
+function setProduct(req, res, next) {
+  const { name, photo, description, price } = req.body;
+  sequelize
+    .query(
+      "INSERT INTO products (item,photo,description,price) VALUES (?,?,?,?)",
+      {
+        replacements: [name, photo, description, price],
+        type: sequelize.QueryTypes.INSERT
+      }
+    )
+    .then(() => {
+      next();
+    });
+}
+
 // ORDENES
 
 server.post("/orders", setOrder, (req, res) => {
   res.json("Pedido registrado");
 });
 
-server.get("/orders", auth, getOrders, getProducts, (req, res) => {
+server.get("/orders", auth, authAdmin, getOrders, getProducts, (req, res) => {
   const { orderData } = req;
   res.status(200).json(orderData);
 });
 
-server.put("/orders/:id", auth, (req, res) => {
+server.put("/orders/:id", authAdmin, (req, res) => {
   const { newStatus } = req.body;
   sequelize
     .query("UPDATE `orders` SET `id_state` = ? WHERE `orders`.`id` = ?", {
