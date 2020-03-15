@@ -26,36 +26,7 @@ server.use(
   cors()
 );
 
-// server.post("/register", (req, res) => {
-//   const { username, name, email, phone, address, password, admin } = req.body;
-//   let insert = `INSERT INTO users(username,name,email,phone,address,password,admin)
-//     VALUES ('${username}','${name}','${email}',${phone},'${address}','${password}',${admin})`;
-//   connection.query(insert);
-//   res.json("Usuario agregado a la base de datos");
-// });
-
-// server.post("/products", (req, res) => {
-//   const { name, photo, description, price } = req.body;
-//   let insert = `INSERT INTO menu(name,photo,description,price)
-//     VALUES ('${name}','${photo}','${description}',${price})`;
-//   connection.query(insert);
-//   res.json("Plato agregado a la base de datos");
-// });
-
-// server.get("/products", (req, res) => {
-//   connection.query("SELECT * FROM menu", (error, results, fields) => {
-//     if (error) throw error;
-//     res.json(results);
-//   });
-// });
-
-// Muestra todos los items del menu
-// connection.query("SELECT * FROM products", function(error, results, fields) {
-//   if (error) throw error;
-//   results.forEach(result => {
-//     console.log(result);
-//   });
-// });
+// AUTH & TOKEN
 
 function auth(req, res, next) {
   if (req.session && req.session.admin) {
@@ -64,10 +35,32 @@ function auth(req, res, next) {
     return res
       .status(401)
       .json(
-        "Se necesitan permisos de administrador para acceder a esta ruta. Por favor, logea un usuario administrador."
+        "Se necesitan permisos de administrador para acceder a esta ruta. Por favor, loguea un usuario administrador."
       );
   }
 }
+
+function getToken(data) {
+  const resp = jwt.sign(data, signature);
+  return resp;
+}
+
+// REGISTER & LOGIN
+
+server.post("/register", (req, res) => {
+  const { username, name, email, phone, address, password, admin } = req.body;
+  sequelize
+    .query(
+      "INSERT INTO users(username,name,email,phone,address,password,admin) VALUES(?,?,?,?,?,?,?)",
+      {
+        replacements: [username, name, email, phone, address, password, admin],
+        type: sequelize.QueryTypes.INSERT
+      }
+    )
+    .then(resp => {
+      res.json("Usuario agregado a la base de datos");
+    });
+});
 
 server.post("/login", userLogin, (req, res) => {
   const { userData } = req;
@@ -78,13 +71,13 @@ server.post("/login", userLogin, (req, res) => {
 });
 
 function userLogin(req, res, next) {
-  if(!req.session.user) {
+  if (!req.session.user) {
     const { user, password } = req.body;
     sequelize
       .query(
         "SELECT id,name,email,phone,address,admin FROM users WHERE username = ? AND password = ?",
         {
-          replacements: [user, password], 
+          replacements: [user, password],
           type: sequelize.QueryTypes.SELECT
         }
       )
@@ -92,6 +85,7 @@ function userLogin(req, res, next) {
         if (result.length != 0) {
           if (result[0].admin) req.session.admin = true;
           req.session.user = user;
+          req.session.id_user = result[0].id;
           req.userData = result[0];
           console.log(req.session);
           next();
@@ -99,30 +93,65 @@ function userLogin(req, res, next) {
           res.status(400).json("Credenciales incorrectas.");
         }
       });
-  }else{
-    res.status(409).json('Ya te encuentras logeado. Por favor deslogea o reinicia el servidor.');
+  } else {
+    res
+      .status(409)
+      .json(
+        "Ya te encuentras logeado. Por favor deslogea o reinicia el servidor."
+      );
   }
-}
-
-function getToken(data) {
-  const resp = jwt.sign(data, signature);
-  return resp;
 }
 
 // PRODUCTOS
 
-// server.put("/products", isLogged, modifyProduct, (req, res) => {
-//   res.status(200).json("producto modificado con exito");
-// })
-
-// function modifyProduct
+server.get("/products", (req, res) => {
+  sequelize
+    .query("SELECT * FROM products", {
+      type: sequelize.QueryTypes.SELECT
+    })
+    .then(results => {
+      res.json(results);
+    });
+});
 
 // ORDENES
+
+server.post("/orders", setOrder, (req, res) => {
+  res.json("Pedido registrado");
+});
 
 server.get("/orders", auth, getOrders, getProducts, (req, res) => {
   const { orderData } = req;
   res.status(200).json(orderData);
 });
+
+function setOrder(req, res, next) {
+  if (req.session.id_user) {
+    const { id_product, qty, paid } = req.body;
+    sequelize
+      .query("INSERT INTO orders (id_user,id_state,paid) VALUES (?,?,?)", {
+        replacements: [req.session.id_user, 1, paid],
+        type: sequelize.QueryTypes.INSERT
+      })
+      .then(result => {
+        const id_order = result[0];
+        sequelize
+          .query(
+            "INSERT INTO order_products(id_order,id_product,qty) VALUES (?,?,?)",
+            {
+              replacements: [id_order, id_product, qty],
+              type: sequelize.QueryTypes.INSERT
+            }
+          )
+          .then(response => {
+            console.log("Pedido registrado");
+            next();
+          });
+      });
+  } else {
+    res.status(401).json("Para realizar un pedido debes estar logueado.");
+  }
+}
 
 function getOrders(req, res, next) {
   sequelize
