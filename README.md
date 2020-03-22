@@ -81,7 +81,76 @@ Restaurante con un listado de platos que desea:
 
     En caso que todo esté ok, el servidor responderá con 200 y un mensaje de pedido registrado.
     
-     
+---
+
+4. El usuario con roles de administrador debe poder
+actualizar el estado del pedido:
+
+    Con el token copiado y colocado en el header, realizar un `put` request al endpoint `http://127.0.0.1:3000/orders/:id` con el siguiente modelo de body:
+
+    `{
+	"newStatus": 5 }`
+
+    newStatus puede recibir los siguientes números de pedidos:
+
+    1: NUEVO, 2: CONFIRMADO, 3: PREPARANDO, 4: ENVIADO, 5: CANCELADO, 6: ENTREGADO.
+
+    En caso de que el actualizador sea admin y se haya hecho correctamente, responderá 200, caso contrario logueará necesitar permisos de administrador.
+
+---
+
+5. Un usuario con rol de administrador debe poder realizar
+las acciones de creación, edición y eliminación de recursos de
+productos (CRUD de productos):
+
+    Siempre con el token copiado y colocado en el header, 
+
+    --
+
+    **Crear producto**: realizar un `post` request al endpoint `http://127.0.0.1:3000/products` con el siguiente modelo de body:
+
+    (Ejemplo):
+
+    `{
+	"name": "Pizza napolitana",
+	"description": "La mejor pizza de la ciudad con el mejor tomate fresco.",
+    "photo": "photo/pizza.png",
+	"price": 169
+    }`
+
+    *(Se necesitan permisos de administrador.)*
+
+    --
+
+    **Leer producto**: realizar un `get` request al endpoint `http://127.0.0.1:3000/products`
+
+    -- 
+
+    **Actualizar producto**: realizar un `put` request al endpoint `http://127.0.0.1:3000/products/:id` con un body con los datos que quieran actualizarse:
+
+    (Ejemplo):
+
+    `{
+    "photo": "new-photo.png",
+	"price": 249
+    }`
+
+    *(Se necesitan permisos de administrador.)*
+
+    -- 
+
+    **Eliminar producto**: realizar un `delete` request al endpoint `http://127.0.0.1:3000/products/:id`
+
+    *(Se necesitan permisos de administrador.)*
+
+    ---
+
+6. Un usuario sin roles de administrador no debe poder
+crear, editar o eliminar un producto, ni editar o eliminar un pedido.
+Tampoco debe poder acceder a informaciones de otros usuarios:
+
+    Cubierto en el punto `5`.
+
 
 
 
