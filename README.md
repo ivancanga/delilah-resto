@@ -1,5 +1,11 @@
 # delilah-resto
 
+Para inicializar la DB: 
+
+1) Antes de comenzar es necesario servidor apache y PhpMyAdmin corriendo (XAMPP) con una entidad llamada ``delilah-resto``, el usuario por defecto de la bd tiene que ser ``root`` sin password.
+
+2) Copiar las queries del archivo llamado **queries.sql**, y correrlas en consola SQL. Esto crea todas las tablas, relaciones y añade algunos registros base.
+
 Para inicializar el servidor:
 
 ``git clone https://github.com/ivancanga/delilah-resto.git``
@@ -10,12 +16,6 @@ Para inicializar el servidor:
 
 ``nodemon server``
 
-
-Para inicializar la DB: 
-
-1) Antes de comenzar es necesario servidor apache y PhpMyAdmin corriendo (XAMPP) con una entidad llamada ``delilah-resto``, el usuario por defecto de la bd tiene que ser ``root`` sin password.
-
-2) Copiar las queries del archivo llamado **queries.sql**, y correrlas en consola SQL. Esto crea todas las tablas, relaciones y añade algunos registros base.
 
 ## Checkout de aprobación:
 
