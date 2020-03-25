@@ -67,8 +67,16 @@ Restaurante con un listado de platos que desea:
     Con el token copiado y colocado en el header, realizar un `post` request al endpoint `http://127.0.0.1:3000/products` con el siguiente modelo de body:
 
     `{
-	"id_product": 2,
-	"qty": 10,
+	"products": [
+		{
+			"id_product": 1,
+			"qty": 4
+		},
+				{
+			"id_product": 2,
+			"qty": 5
+		}
+	],
 	"paid": 1
 }`
     
