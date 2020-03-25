@@ -113,23 +113,51 @@ server.post("/products", auth, authAdmin, setProduct, (req, res) => {
   res.json("Producto agregado a la base de datos.");
 });
 
-// server.put("/products/:id", authAdmin, (req, res) => {
-//   sequelize.query(
-//     "SELECT item, photo, description, price FROM products WHERE `products`.`.id` = ?",
-//     {
-//       replacements: [req.params.id]
-//     }
-//   )
-//   const { item, photo, description, price } = req.body;
-//   sequelize.query(
-//     "UPDATE `products` SET `item` = ?, `photo` = ?, `description` = ?, `price` = ? WHERE `products`.`id` = ?",
-//     {
-//       replacements: [item, photo, description, price, req.params.id],
-//       type: sequelize.QueryTypes.INSERT
-//     }
-//   );
-//   res.json('Producto actualizado');
-// });
+server.put("/products/:id", auth, authAdmin, async (req, res) => {
+  let productFound = await getProduct(req.params.id);
+  if (productFound) {
+    const { item, photo, description, price } = req.body;
+    const filteredProps = filterProps({ item, photo, description, price });
+    productFound = { ...productFound, ...filteredProps };
+
+    sequelize
+      .query(
+        "UPDATE `products` SET `item` = ?, `description` = ?, `photo` = ?, `price` = ? WHERE `products`.`id` = ?",
+        {
+          replacements: [
+            productFound.item,
+            productFound.description,
+            productFound.photo,
+            productFound.price,
+            req.params.id
+          ],
+          type: sequelize.QueryTypes.UPDATE
+        }
+      )
+      .then(() => {
+        res.json(`El producto ${req.params.id} ha sido modificado con éxito.`);
+      });
+  }else{
+    res.status(400).json("No encontré un producto con ese ID.");
+  }
+});
+
+async function getProduct(id) {
+  let [
+    response
+  ] = await sequelize.query(
+    "SELECT * from `products` WHERE `products`.`id` = ?",
+    { replacements: [id] }
+  );
+  return response[0];
+}
+
+function filterProps(inputObject) {
+  Object.keys(inputObject).forEach(
+    key => !inputObject[key] && delete inputObject[key]
+  );
+  return inputObject;
+}
 
 server.delete("/products/:id", auth, authAdmin, deleteProduct, (req, res) => {
   res.json("Producto eliminado de la base de datos.");
