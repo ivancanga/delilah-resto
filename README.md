@@ -15,12 +15,7 @@ Para inicializar la DB:
 
 1) Antes de comenzar es necesario servidor apache y PhpMyAdmin corriendo (XAMPP) con una entidad llamada ``delilah-resto``, el usuario por defecto de la bd tiene que ser ``root`` sin password.
 
-2) Copiar las queries del archivo llamado **queries.txt**, ir a la pestaña SQL y correrlas. Esto crea todas las tablas, relaciones y añade registros base.
-
-
-## A tener en cuenta:
-
-
+2) Copiar las queries del archivo llamado **queries.sql**, y correrlas en consola SQL. Esto crea todas las tablas, relaciones y añade algunos registros base.
 
 ## Checkout de aprobación:
 
