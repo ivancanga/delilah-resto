@@ -137,7 +137,7 @@ server.put("/products/:id", auth, authAdmin, async (req, res) => {
       .then(() => {
         res.json(`El producto ${req.params.id} ha sido modificado con éxito.`);
       });
-  }else{
+  } else {
     res.status(400).json("No encontré un producto con ese ID.");
   }
 });
@@ -216,7 +216,7 @@ server.put("/orders/:id", auth, authAdmin, (req, res) => {
 });
 
 function setOrder(req, res, next) {
-  const { id_product, qty, paid } = req.body;
+  const { products, paid } = req.body;
   sequelize
     .query("INSERT INTO orders (id_user,id_state,paid) VALUES (?,?,?)", {
       replacements: [req.userData.id, 1, paid],
@@ -224,17 +224,28 @@ function setOrder(req, res, next) {
     })
     .then(result => {
       const id_order = result[0];
-      sequelize
-        .query(
-          "INSERT INTO order_products(id_order,id_product,qty) VALUES (?,?,?)",
-          {
-            replacements: [id_order, id_product, qty],
-            type: sequelize.QueryTypes.INSERT
-          }
-        )
-        .then(response => {
-          console.log("Pedido registrado");
+      let promises = [];
+      products.forEach(product => {
+        promises.push(
+          sequelize
+            .query(
+              "INSERT INTO order_products(id_order,id_product,qty) VALUES (?,?,?)",
+              {
+                replacements: [id_order, product.id_product, product.qty],
+                type: sequelize.QueryTypes.INSERT
+              }
+            )
+            .then(response => {
+              console.log("Producto añadido");
+            })
+        );
+      });
+      Promise.all(promises)
+        .then(() => {
           next();
+        })
+        .catch(err => {
+          console.log(err);
         });
     });
 }
