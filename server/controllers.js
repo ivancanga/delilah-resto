@@ -8,16 +8,13 @@ const signature = "39486747";
 
 const cors = require("cors");
 
-const Sequelize = require("sequelize");
-const sequelize = new Sequelize("mysql://root@localhost:3306/delilah-resto");
+const sequelize = require("./server_setup");
 
 server.listen(3000, () => {
   console.log("Servidor iniciado");
 });
 
 server.use(bodyParser.json(), cors());
-
-// AUTH-AUTH ADMIN & TOKEN
 
 function auth(req, res, next) {
   try {
@@ -49,8 +46,6 @@ function getToken(data) {
   const resp = jwt.sign(data, signature);
   return resp;
 }
-
-// REGISTER & LOGIN/LOGOUT
 
 server.post("/register", (req, res) => {
   const { username, name, email, phone, address, password, admin } = req.body;
@@ -96,8 +91,6 @@ function userLogin(req, res, next) {
       }
     });
 }
-
-// PRODUCTOS
 
 server.get("/products", auth, (req, res) => {
   sequelize
@@ -191,8 +184,6 @@ function setProduct(req, res, next) {
       next();
     });
 }
-
-// ORDENES
 
 server.post("/orders", auth, setOrder, (req, res) => {
   res.json("Pedido registrado");

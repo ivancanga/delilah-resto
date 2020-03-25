@@ -8,7 +8,7 @@ Para inicializar el servidor:
 
 ``cd server``
 
-``nodemon server``
+``nodemon controllers``
 
 
 Para inicializar la DB: 
