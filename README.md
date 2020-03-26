@@ -64,7 +64,7 @@ disponibles:
 3. Un usuario debe poder generar un nuevo pedido al
 Restaurante con un listado de platos que desea:
 
-    Con el token copiado y colocado en el header, realizar un `post` request al endpoint `http://127.0.0.1:3000/products` con el siguiente modelo de body:
+    Con el token copiado y colocado en el header, realizar un `post` request al endpoint `http://127.0.0.1:3000/orders` con el siguiente modelo de body:
 
     `{
 	"products": [
