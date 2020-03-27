@@ -164,7 +164,7 @@ Tampoco debe poder acceder a informaciones de otros usuarios:
 
     --
 
-    **Listar usuarios por id **: realizar un `get` request al endpoint `http://127.0.0.1:3000/users/:id`.
+    **Listar usuarios por id**: realizar un `get` request al endpoint `http://127.0.0.1:3000/users/:id`.
 
     *(Se necesitan permisos de administrador.)*.
 
