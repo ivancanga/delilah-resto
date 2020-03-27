@@ -17,6 +17,8 @@ ALTER TABLE `orders` ADD FOREIGN KEY (`id_user`) REFERENCES `delilah-resto`.`use
 
 ALTER TABLE `order_products` ADD FOREIGN KEY (`id_order`) REFERENCES `delilah-resto`.`orders`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT; ALTER TABLE `order_products` ADD FOREIGN KEY (`id_product`) REFERENCES `delilah-resto`.`products`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
+ALTER TABLE `order_products` DROP FOREIGN KEY `order_products_ibfk_1`; ALTER TABLE `order_products` ADD CONSTRAINT `order_products_ibfk_1` FOREIGN KEY (`id_order`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE RESTRICT;
+
 
 -- INSERTS
 

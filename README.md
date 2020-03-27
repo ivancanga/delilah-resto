@@ -152,7 +152,23 @@ productos (CRUD de productos):
 crear, editar o eliminar un producto, ni editar o eliminar un pedido.
 Tampoco debe poder acceder a informaciones de otros usuarios:
 
-    Cubierto en el punto `5`.
+    **Eliminar un pedido**: realizar un `delete` request al endpoint `http://127.0.0.1:3000/orders/:id`.
+
+    *(Se necesitan permisos de administrador.)*.
+
+    --
+
+    **Listar usuarios**: realizar un `get` request al endpoint `http://127.0.0.1:3000/users`.
+
+    *(Se necesitan permisos de administrador.)*.
+
+    --
+
+    **Listar usuarios por id **: realizar un `get` request al endpoint `http://127.0.0.1:3000/users/:id`.
+
+    *(Se necesitan permisos de administrador.)*.
+
+    --
 
 
 

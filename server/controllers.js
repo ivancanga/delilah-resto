@@ -92,6 +92,32 @@ function userLogin(req, res, next) {
     });
 }
 
+server.get("/users", auth, authAdmin, (req, res) => {
+  sequelize
+    .query("SELECT * FROM users", {
+      type: sequelize.QueryTypes.SELECT
+    })
+    .then(results => {
+      res.json(results);
+    });
+});
+
+server.get("/users/:id", auth, authAdmin, (req, res) => {
+  let id_user = req.params.id;
+  sequelize
+    .query("SELECT * FROM users WHERE users.id = ?", {
+      replacements: [id_user],
+      type: sequelize.QueryTypes.SELECT
+    })
+    .then((result) => {
+      if(result[0]){
+        res.json(result[0]);
+      }else{
+        res.json("No se ha encontrado el usuario.")
+      }
+    });
+});
+
 server.get("/products", auth, (req, res) => {
   sequelize
     .query("SELECT * FROM products WHERE drop_date IS NULL", {
@@ -203,6 +229,17 @@ server.put("/orders/:id", auth, authAdmin, (req, res) => {
     })
     .then(() => {
       res.json("El estado del pedido ha sido modificado con éxito.");
+    });
+});
+
+server.delete("/orders/:id", auth, authAdmin, (req, res) => {
+  sequelize
+    .query("DELETE FROM `orders` WHERE `orders`.`id` = ?", {
+      replacements: [req.params.id],
+      type: sequelize.QueryTypes.UPDATE
+    })
+    .then(() => {
+      res.json("El pedido ha sido eliminado.");
     });
 });
 
